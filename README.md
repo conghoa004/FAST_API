@@ -142,15 +142,17 @@ engine = create_engine(
 
 ```css
 src/
+ ┣ config/ # Cấu hình hệ thống như db...
+ ┣ middleware/ # Xử lý các validate về quyền chặn router...
  ┣ user/
- ┃ ┣ user_controller.py
- ┃ ┣ user_router.py
- ┃ ┣ user_model.py
- ┃ ┣ user_utils.py
- ┣ auth/
- ┃ ┣ auth_controller.py
- ┃ ┣ auth_router.py
- ┣ utils/
+ ┃ ┣ user_controller.py # Xử lý nhận dữ liệu và validate như kiểm tra dữ liệu đầu vào (không hướng nghiệp vụ)
+ ┃ ┣ user_service.py # Thực hiện xử lý ngiệp vụ gọi repo để thực hiện thao tác với DB
+ ┃ ┣ user_repository.py # Thực hiện thao tác với DB
+ ┃ ┣ user_model.py # Tạo schema cho DB
+ ┃ ┣ user_router.py # Cấu hình tuyến đường
+ ┃ ┣ user_dto.py # Các hàm validate dữ liệu
+ ┃ ┣ user_utils.py # Các hàm tiện ích như (hash password)
+ ┣ utils/ # Thành phần tiện ích sẽ nằm ở đây
  ┃ ┣ utils_router.py
  ┃ ┣ utils_controller.py
 ```
