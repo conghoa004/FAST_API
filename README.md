@@ -136,37 +136,59 @@ engine = create_engine(
 
 ---
 
-## 8. Tách router (chuẩn project)
+## 8. Kiến trúc Feature / Module-based Architecture
 
 📁 Cấu trúc:
 
 ```css
-app/
- ├── main.py
- ├── routers/
- │    └── user.py
+src/
+ ┣ user/
+ ┃ ┣ user_controller.py
+ ┃ ┣ user_router.py
+ ┃ ┣ user_model.py
+ ┃ ┣ user_utils.py
+ ┣ auth/
+ ┃ ┣ auth_controller.py
+ ┃ ┣ auth_router.py
+ ┣ utils/
+ ┃ ┣ utils_router.py
+ ┃ ┣ utils_controller.py
 ```
 
-📄 `routers/user.py`
+📄 `src/user/user_controller.py`
+
+```python
+# User controller
+def index():
+    return {"user": "hoaze", "age": 22, "address": "VL"}
+```
+
+📄 `src/user/user_router.py`
 
 ```python
 from fastapi import APIRouter
+from src.user.user_controller import index
 
 router = APIRouter()
 
-@router.get("/users")
-def users():
-    return ["A", "B"]
+# GET info user
+router.get("/users")(index)
 ```
 
 📄 `main.py`
 
 ```python
+from typing import Union
 from fastapi import FastAPI
-from routers.user import router
+from src.user.user_router import router as user_router
+from src.utils.utils_router import router as utils_router
 
+# Create the app
 app = FastAPI()
-app.include_router(router)
+
+# Include routers
+app.include_router(utils_router)
+app.include_router(user_router)
 ```
 
 ---
