@@ -1,264 +1,228 @@
-## 1. FastAPI là gì?
+# FastAPI Boilerplate Project
 
-**FastAPI** là framework Python để xây dựng **REST API**:
-
-- 🚀 Rất nhanh (dựa trên Starlette + Pydantic)
-
-- 📄 Tự sinh Swagger UI & OpenAPI
-
-- 🔒 Validate dữ liệu tự động
-
-- 🔥 Rất hợp làm API cho AI / Mobile / Web
+A modern, production-ready FastAPI boilerplate application featuring a **Feature/Module-based Architecture**, environment configuration, and Docker containerization support.
 
 ---
 
-## 2. Cài đặt FastAPI
+## Table of Contents
+1. [Overview](#1-overview)
+2. [Prerequisites](#2-prerequisites)
+3. [Installation & Setup](#3-installation--setup)
+   - [Local Environment Setup](#local-environment-setup)
+   - [Environment Configuration](#environment-configuration)
+4. [Project Structure](#4-project-structure)
+5. [Running the Application](#5-running-the-application)
+   - [Local Development Mode](#local-development-mode)
+   - [Docker / Docker Compose Mode](#docker--docker-compose-mode)
+6. [API Endpoints & Swagger Documentation](#6-api-endpoints--swagger-documentation)
+7. [Adding a New Feature/Module](#7-adding-a-new-featuremodule)
+8. [Advanced Topics](#8-advanced-topics)
+   - [Database Connection](#database-connection)
+   - [JWT Authentication](#jwt-authentication)
 
-```bash
-pip install "fastapi[standard]"
+---
+
+## 1. Overview
+
+**FastAPI** is a modern, fast (high-performance), web framework for building APIs with Python 3.8+ based on standard Python type hints.
+
+Key features of this boilerplate:
+- 🚀 **High Performance**: Built on top of Starlette and Pydantic.
+- 📄 **Interactive API Docs**: Auto-generated Swagger UI and ReDoc.
+- 🔒 **Data Validation**: Built-in validation using Pydantic.
+- 🧱 **Scalable Architecture**: Structured using a Feature/Module-based layout.
+- 🐳 **Docker Ready**: Pre-configured `Dockerfile` and `docker-compose.yml` for containerization.
+
+---
+
+## 2. Prerequisites
+
+Make sure you have the following installed on your system:
+- **Python 3.11+**
+- **pip** (Python package installer)
+- **Docker** and **Docker Compose** (Optional, for containerized environments)
+
+---
+
+## 3. Installation & Setup
+
+### Local Environment Setup
+
+1. **Clone the repository** (or navigate to your project directory):
+   ```bash
+   cd <project_directory>
+   ```
+
+2. **Create a virtual environment**:
+   It is highly recommended to use a virtual environment to isolate project dependencies.
+   - **Windows (PowerShell)**:
+     ```powershell
+     python -m venv venv
+     .\venv\Scripts\Activate.ps1
+     ```
+   - **macOS / Linux**:
+     ```bash
+     python3 -m venv venv
+     source venv/bin/activate
+     ```
+
+3. **Install dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Environment Configuration
+
+1. **Set up `.env`**:
+   The project requires a `.env` file at the root directory for configuration. Make sure you have a `.env` file containing:
+   ```env
+   APP_NAME=FastAPI App
+   DEBUG=true
+   DB_HOST=localhost
+   DB_USER=root
+   DB_PASSWORD=123456
+   DB_NAME=test_db
+   JWT_SECRET=supersecret
+   ```
+
+2. **Security Warning**:
+   Do **NOT** commit your `.env` file to version control systems like Git. The `.gitignore` file should always contain `.env` to prevent accidental commits.
+
+---
+
+## 4. Project Structure
+
+The project follows a **Feature/Module-based Architecture**, grouping logic by domains/features instead of technical layers (like MVC). This makes scale-up cleaner and keeps code relevant to a specific domain together.
+
+```css
+FAST_API/
+ ┣ src/
+ ┃ ┣ config/           # Global configuration files (e.g., db connection, environment settings)
+ ┃ ┃ ┗ mysql.py        # Database setup and connection engine
+ ┃ ┣ middleware/       # Custom middleware (auth, logging, CORS, security validation)
+ ┃ ┃ ┗ check_role.py   # Role-based access control middleware
+ ┃ ┣ user/             # User Feature Module
+ ┃ ┃ ┣ user_controller.py   # Processes requests and returns responses (no business logic)
+ ┃ ┃ ┣ user_router.py       # Configures user-specific URL routes
+ ┃ ┃ ┣ user_model.py        # Database schemas and models
+ ┃ ┃ ┣ user_utils.py        # Utility helper functions specific to users
+ ┃ ┃ ┗ user_dto.py          # Data Transfer Objects / Pydantic validation schemas
+ ┃ ┣ utils/            # Shared / General Utilities Module
+ ┃ ┃ ┣ utils_controller.py  # Shared controller methods
+ ┃ ┃ ┗ utils_router.py      # Route configuration for general utilities
+ ┣ .env                # Local environment variables
+ ┣ Dockerfile          # Multi-stage build image instructions
+ ┣ docker-compose.yml  # Docker Compose orchestration configuration
+ ┣ main.py             # App entrypoint & Router registration
+ ┗ requirements.txt    # List of requirements/dependencies
 ```
 
 ---
 
-## 3. Tạo API đầu tiên
+## 5. Running the Application
 
-📁 main.py
+### Local Development Mode
 
-```python
-from typing import Union
-
-from fastapi import FastAPI
-
-app = FastAPI()
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
-```
-
----
-
-## ▶️ Chạy server:
-
+To run the application locally with hot-reloading (changes will auto-reload the server):
 ```bash
 fastapi dev main.py
 ```
+Alternatively, you can run using `uvicorn`:
+```bash
+uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
 
-🌐 Truy cập:
+### Docker / Docker Compose Mode
 
-- API: http://127.0.0.1:8000
+To build and run the application inside a Docker container:
+```bash
+# Build and run in the background
+docker compose up --build -d
 
-- Swagger: http://127.0.0.1:8000/docs
-
-- Redoc: http://127.0.0.1:8000/redoc
+# Check running container logs
+docker compose logs -f
+```
+The server will start up inside Docker and listen on port `8000`.
 
 ---
 
-## 4. Tạo API GET / POST
+## 6. API Endpoints & Swagger Documentation
 
-**GET**
+Once the server is running, the following endpoints are available:
 
-```python
-@app.get("/users")
-def get_users():
-    return ["A", "B", "C"]
-```
-
-**POST**
-
-```python
-from pydantic import BaseModel
-
-class User(BaseModel):
-    name: str
-    age: int
-
-@app.post("/users")
-def create_user(user: User):
-    return user
-
-```
-
-📌 FastAPI tự validate JSON:
-
-```json
-{
-  "name": "Cong",
-  "age": 22
-}
-```
+- **Root API**: [http://127.0.0.1:8000/](http://127.0.0.1:8000/) - Returns `{"message": "Hello World"}`
+- **Get Users API**: [http://127.0.0.1:8000/users](http://127.0.0.1:8000/users) - Returns mock user details.
+- **Interactive Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) (Allows you to view, test, and document all APIs in real-time).
+- **Alternative ReDoc Docs**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc).
 
 ---
 
-## 5. Query params & Path params
+## 7. Adding a New Feature/Module
 
-```python
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"id": item_id, "q": q}
-```
+To add a new feature (e.g., `product`):
 
-➡️ `/items/10?q=abc`
+1. **Create the folder structure**:
+   Create a new directory `src/product/` with the following files:
+   - `product_router.py`
+   - `product_controller.py`
+   - `product_model.py` (if db required)
+
+2. **Define routes and handlers**:
+   * `src/product/product_controller.py`:
+     ```python
+     def get_products():
+         return [{"id": 1, "name": "Laptop"}, {"id": 2, "name": "Smartphone"}]
+     ```
+   * `src/product/product_router.py`:
+     ```python
+     from fastapi import APIRouter
+     from src.product.product_controller import get_products
+
+     router = APIRouter()
+     router.get("/products")(get_products)
+     ```
+
+3. **Register the router in `main.py`**:
+   ```python
+   # main.py
+   ...
+   from src.product.product_router import router as product_router
+   
+   app.include_router(product_router)
+   ```
 
 ---
 
-## 6. Trả HTTP status code
+## 8. Advanced Topics
 
-```python
-from fastapi import HTTPException
+### Database Connection
 
-@app.get("/products/{id}")
-def get_product(id: int):
-    if id != 1:
-        raise HTTPException(status_code=404, detail="Not found")
-    return {"id": 1, "name": "Laptop"}
-```
-
-## 7. Kết nối Database (ví dụ MySQL)
-
+This template supports database connections like MySQL/PostgreSQL using SQLAlchemy or SQLModel.
+First, install required dependencies:
 ```bash
 pip install sqlalchemy pymysql
 ```
 
+Set up your engine in `src/config/mysql.py`:
 ```python
 from sqlalchemy import create_engine
-
-engine = create_engine(
-    "mysql+pymysql://root:password@localhost/db_name"
-)
-```
-
----
-
-## 8. Kiến trúc Feature / Module-based Architecture
-
-📁 Cấu trúc:
-
-```css
-src/
- ┣ config/ # Cấu hình hệ thống như db...
- ┣ middleware/ # Xử lý các validate về quyền chặn router...
- ┣ user/
- ┃ ┣ user_controller.py # Xử lý nhận dữ liệu và validate như kiểm tra dữ liệu đầu vào (không hướng nghiệp vụ)
- ┃ ┣ user_service.py # Thực hiện xử lý ngiệp vụ gọi repo để thực hiện thao tác với DB
- ┃ ┣ user_repository.py # Thực hiện thao tác với DB
- ┃ ┣ user_model.py # Tạo schema cho DB
- ┃ ┣ user_router.py # Cấu hình tuyến đường
- ┃ ┣ user_dto.py # Các hàm validate dữ liệu
- ┃ ┣ user_utils.py # Các hàm tiện ích như (hash password)
- ┣ utils/ # Thành phần tiện ích sẽ nằm ở đây
- ┃ ┣ utils_router.py
- ┃ ┣ utils_controller.py
-```
-
-📄 `src/user/user_controller.py`
-
-```python
-# User controller
-def index():
-    return {"user": "hoaze", "age": 22, "address": "VL"}
-```
-
-📄 `src/user/user_router.py`
-
-```python
-from fastapi import APIRouter
-from src.user.user_controller import index
-
-router = APIRouter()
-
-# GET info user
-router.get("/users")(index)
-```
-
-📄 `main.py`
-
-```python
-from typing import Union
-from fastapi import FastAPI
-from src.user.user_router import router as user_router
-from src.utils.utils_router import router as utils_router
-
-# Create the app
-app = FastAPI()
-
-# Include routers
-app.include_router(utils_router)
-app.include_router(user_router)
-```
-
----
-
-## 9. Auth JWT (tóm tắt)
-
-```bash
-pip install python-jose passlib[bcrypt]
-```
-
-- Login → trả JWT
-
-- Request sau → gửi Authorization: Bearer token
-
-👉 FastAPI rất mạnh cho:
-
-- 🔐 Auth API
-
-- 🤖 AI model API
-
-- 📱 Backend cho React / Flutter / Expo
-
----
-
-## 10. Dùng `.env`
-
-**Cài thư viện**
-
-```bash
-pip install python-dotenv
-```
-
-**Tạo file `.env`**
-
-```env
-APP_NAME=FastAPI App
-DEBUG=true
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=123456
-DB_NAME=test_db
-JWT_SECRET=supersecret
-```
-
-📌 **KHÔNG commit file** `.env`
-
-```bash
-# .gitignore
-.env
-```
-
-**Load biến môi trường**
-
-```python
-from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
-APP_NAME = os.getenv("APP_NAME")
-DEBUG = os.getenv("DEBUG")
+DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
 ```
 
----
+### JWT Authentication
 
-## 11. Build & run bằng docker-compose
-
+For securing APIs, install Python-Jose and Passlib for hashing and token generation:
 ```bash
-docker compose up --build -d
+pip install python-jose passlib[bcrypt]
 ```
-
+Use middleware or dependencies to check the `Authorization: Bearer <token>` header on protected endpoints.
